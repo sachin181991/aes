@@ -18,18 +18,27 @@ const {
 async function hybridDecryption(encObject, rawPrivateKey, rawAesKey) {
   try {
     // Algorithm configurations
+    // Note: Using SHA-1 to match pointycastle's OAEPEncoding default
     const rsaAlgorithm = {
       name: 'RSA-OAEP',
-      hash: 'SHA-256'
+      hash: 'SHA-1'  // Changed from SHA-256 to match Flutter pointycastle default
     };
     
     const aesAlgorithm = {
       name: 'AES-CBC'
     };
     
-    // Decrypt keys
-    const decryptedAesKey = modifiedCaesarDecrypt(rawAesKey);
-    const decryptedPrivateKey = keyDecrypt(rawPrivateKey);
+    // Decrypt keys (only if they're encrypted)
+    // Test keys are plain base64, so check if they need decryption
+    // Base64-encoded 32-byte key is 44 characters (with padding)
+    // If it's base64 format (contains only base64 chars and =), use it as-is
+    const isBase64Key = /^[A-Za-z0-9+/=]+$/.test(rawAesKey) && rawAesKey.length >= 32;
+    const decryptedAesKey = rawAesKey.includes('-----BEGIN') || isBase64Key
+      ? rawAesKey  // Already plain (base64 or PEM format)
+      : modifiedCaesarDecrypt(rawAesKey);
+    const decryptedPrivateKey = rawPrivateKey.includes('-----BEGIN PRIVATE KEY-----')
+      ? rawPrivateKey  // Already plain PEM
+      : keyDecrypt(rawPrivateKey);
     
     // Import keys
     const importedAesKey = await importAesKey(decryptedAesKey);

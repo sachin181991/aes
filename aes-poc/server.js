@@ -3,6 +3,9 @@ const cors = require('cors');
 const { hybridEncryption } = require('./services/encryptionService');
 const { hybridDecryption } = require('./services/decryptionService');
 const crypto = require('crypto');
+// Use test keys for testing (plain, unencrypted keys)
+// Switch back to './utils/keys' for production with encrypted keys
+const { eAk, enPu, enPr } = require('./utils/testKeys');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -12,29 +15,13 @@ app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// Generate default keys for testing (in production, these should be securely stored)
-function generateDefaultKeys() {
-  // Generate RSA key pair
-  const { publicKey, privateKey } = crypto.generateKeyPairSync('rsa', {
-    modulusLength: 2048,
-    publicKeyEncoding: {
-      type: 'spki',
-      format: 'pem'
-    },
-    privateKeyEncoding: {
-      type: 'pkcs8',
-      format: 'pem'
-    }
-  });
-  
-  // Generate AES key (32 bytes = 256 bits)
-  const aesKey = crypto.randomBytes(32).toString('base64');
-  
-  return { publicKey, privateKey, aesKey };
-}
-
-// Store default keys (in production, use proper key management)
-const defaultKeys = generateDefaultKeys();
+// Use keys from keys.js (encrypted keys from keys.md)
+// These will be decrypted when used
+const defaultKeys = {
+  publicKey: enPu,
+  privateKey: enPr,
+  aesKey: eAk
+};
 
 // Health check endpoint
 app.get('/health', (req, res) => {
@@ -53,21 +40,47 @@ app.get('/api/keys', (req, res) => {
 // Encryption endpoint
 app.post('/api/encrypt', async (req, res) => {
   try {
-    const { plaintextData, rawPublicKey, rawAesKey } = req.body;
+    const { encryptedData, plaintextData, rawPublicKey, rawAesKey, rawPrivateKey } = req.body;
+
+    console.log('Encrypted data:', encryptedData);
     
-    if (!plaintextData) {
-      return res.status(400).json({ error: 'plaintextData is required' });
+    let decryptedPlaintextData = null;
+    
+    // If encryptedData is provided, decrypt it first (Flutter sends encrypted)
+    if (encryptedData && encryptedData.encryptedDataBase64 && encryptedData.encryptedIvBase64) {
+      try {
+        const privateKey = rawPrivateKey || defaultKeys.privateKey;
+        const aesKey = rawAesKey || defaultKeys.aesKey;
+        decryptedPlaintextData = await hybridDecryption(encryptedData, privateKey, aesKey);
+        console.log('Decrypted plaintext data:', decryptedPlaintextData);
+      } catch (decryptError) {
+        console.error('Decryption error in encrypt endpoint:', decryptError);
+        return res.status(400).json({ 
+          error: 'Failed to decrypt incoming data: ' + decryptError.message 
+        });
+      }
+    } else if (plaintextData) {
+      console.log('plaintext data:', decryptedPlaintextData);
+      // Legacy support: if plaintextData is provided directly, use it
+      decryptedPlaintextData = plaintextData;
+    } else {
+      return res.status(400).json({ 
+        error: 'Either encryptedData or plaintextData is required' 
+      });
     }
     
     // Use provided keys or default keys
     const publicKey = rawPublicKey || defaultKeys.publicKey;
     const aesKey = rawAesKey || defaultKeys.aesKey;
     
-    const encryptedResult = await hybridEncryption(plaintextData, publicKey, aesKey);
+    // Encrypt the data
+    const encryptedResult = await hybridEncryption(decryptedPlaintextData, publicKey, aesKey);
+    const encryptedDataObj = JSON.parse(encryptedResult);
     
+    // Return encrypted response (Flutter will decrypt it)
     res.json({
       success: true,
-      encryptedData: JSON.parse(encryptedResult)
+      encryptedData: encryptedDataObj
     });
   } catch (error) {
     console.error('Encryption error:', error);
@@ -97,12 +110,44 @@ app.post('/api/decrypt', async (req, res) => {
     const privateKey = rawPrivateKey || defaultKeys.privateKey;
     const aesKey = rawAesKey || defaultKeys.aesKey;
     
+    // Decrypt the incoming encrypted data (Flutter sends encrypted request)
     const decryptedResult = await hybridDecryption(encryptedData, privateKey, aesKey);
     
-    res.json({
-      success: true,
-      decryptedData: decryptedResult
-    });
+    // The decrypted result should contain the actual encrypted data to decrypt
+    // Parse it if it's a JSON string
+    let dataToDecrypt = decryptedResult;
+    if (typeof decryptedResult === 'string') {
+      try {
+        dataToDecrypt = JSON.parse(decryptedResult);
+      } catch (e) {
+        // If not JSON, use as is
+      }
+    }
+    
+    // If the decrypted data is an encrypted object, decrypt it again
+    if (dataToDecrypt && 
+        dataToDecrypt.encryptedDataBase64 && 
+        dataToDecrypt.encryptedIvBase64) {
+      const finalDecrypted = await hybridDecryption(dataToDecrypt, privateKey, aesKey);
+      
+      // Encrypt the response before sending back (Flutter will decrypt it)
+      const publicKey = defaultKeys.publicKey;
+      const encryptedResponse = await hybridEncryption(finalDecrypted, publicKey, aesKey);
+      
+      res.json({
+        success: true,
+        encryptedData: JSON.parse(encryptedResponse)
+      });
+    } else {
+      // If it's already decrypted, encrypt the response
+      const publicKey = defaultKeys.publicKey;
+      const encryptedResponse = await hybridEncryption(decryptedResult, publicKey, aesKey);
+      
+      res.json({
+        success: true,
+        encryptedData: JSON.parse(encryptedResponse)
+      });
+    }
   } catch (error) {
     console.error('Decryption error:', error);
     res.status(500).json({

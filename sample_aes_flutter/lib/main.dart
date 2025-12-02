@@ -1,7 +1,11 @@
 import 'dart:convert';
+import 'dart:developer' show log;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'services/encryption_api_service.dart';
+// Use test keys for testing (plain, unencrypted keys)
+// Switch back to 'utils/keys.dart' for production with encrypted keys
+import 'utils/test_keys.dart' as TestKeys;
 
 void main() {
   runApp(const MyApp());
@@ -67,13 +71,20 @@ class _EncryptionDecryptionPageState extends State<EncryptionDecryptionPage> {
     });
 
     try {
-      final keys = await _apiService.getKeys();
+      // Use test keys (plain, unencrypted keys for testing)
       setState(() {
-        _publicKey = keys['publicKey'] as String?;
-        _privateKey = keys['privateKey'] as String?;
-        _aesKey = keys['aesKey'] as String?;
+        _publicKey = TestKeys.TestKeys.enPu;
+        _privateKey = TestKeys.TestKeys.enPr;
+        _aesKey = TestKeys.TestKeys.eAk;
         _isLoading = false;
       });
+      
+      // Also set keys in API service
+      _apiService.setKeys(
+        publicKey: TestKeys.TestKeys.enPu,
+        privateKey: TestKeys.TestKeys.enPr,
+        aesKey: TestKeys.TestKeys.eAk,
+      );
     } catch (e) {
       setState(() {
         _errorMessage = 'Failed to load keys: $e';
@@ -120,8 +131,10 @@ class _EncryptionDecryptionPageState extends State<EncryptionDecryptionPage> {
         });
       }
     } catch (e) {
+      log('Encryption error: $e');
       setState(() {
         _errorMessage = 'Encryption error: $e';
+        
         _isLoading = false;
       });
     }

@@ -1,0 +1,61 @@
+/// Test keys for encryption/decryption testing
+/// These are plain (unencrypted) keys for testing purposes
+
+// Testing keys
+class TestKeys {
+  // AES key in base64 (plain, not encrypted)
+  static const String eAk = "zKIcOJK5ui+0GMdehxBYpaTnYltfjBn0ug9BziV2Aq8=";
+
+  // RSA Public Key (plain, not encrypted)
+  static const String enPu = """-----BEGIN PUBLIC KEY-----
+MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAv6AOLJ4s3nr9sEaw514b
+CnWcLtA+AV8UVvOUlv+NCgoGqZpxa51wcqLEXxKTtKCuw+HZhdwvU1FA9WZL4rn0
+N6w71J1Ne/IF7GeAA42ubxQP6p7tGNEtq7t274DHzapm7h3WmnOtGtKsQmvdjF3G
+JpdwJj0+qbG9m8QPPXHxQ31HHRPCdLIIl9Yy5OtmkLu4m75yMGDnomWTB85JrvfZ
+YIGErJEOufmQKpCnfWwOjyH1EVwxR98RlnnLpolXR49Y6MCNO/DuodFw/9uYk6MK
+RWmKKRUsTV2xgEF4GalRWP01cVNJf3y1v5iogCZIqzufzB/XNbDzx8ulQxjRD0Ts
+CQIDAQAB
+-----END PUBLIC KEY-----""";
+
+  // RSA Private Key (plain, not encrypted)
+  static const String enPr = """-----BEGIN PRIVATE KEY-----
+MIIEvwIBADANBgkqhkiG9w0BAQEFAASCBKkwggSlAgEAAoIBAQC/oA4snizeev2w
+RrDnXhsKdZwu0D4BXxRW85SW/40KCgapmnFrnXByosRfEpO0oK7D4dmF3C9TUUD1
+ZkviufQ3rDvUnU178gXsZ4ADja5vFA/qnu0Y0S2ru3bvgMfNqmbuHdaac60a0qxC
+a92MXcYml3AmPT6psb2bxA89cfFDfUcdE8J0sgiX1jLk62aQu7ibvnIwYOeiZZMH
+zkmu99lggYSskQ65+ZAqkKd9bA6PIfURXDFH3xGWecumiVdHj1jowI078O6h0XD/
+25iTowpFaYopFSxNXbGAQXgZqVFY/TVxU0l/fLW/mKiAJkirO5/MH9c1sPPHy6VD
+GNEPROwJAgMBAAECggEAAIKGIyGBHE7ut546iIUQNJsLQTch4RpOCSyw/aVcrFUK
+Pz+HU3pZ4x4ygE/B95oxWNlUHTZwpEu8LOL6qvXkc9T4HEjWXNDwKdi9JxVEjGxc
+3fqSBi3BTbqMFpdMwMv2JeZLrMHHyUFb/rm/f0j9Fttyi5GAZg5wYxaWlUrlMdEl
+c+ECn9rfsaCD+08SiaMEO3XfTAS+Zm7SeAAgRE+NKCmrCzihIkMUmzFeqh/TIK+p
+PuqLar27jgfBf8kWcAI418LP+HoB+Suqqq0j5AWUPZfPzQvoR4oS81LR/t/pLCTu
+1+3P+TnQcM6XL4hE1F0AH+agAXyJBVQ97d3R4n0+IQKBgQD8QxCvtPcXvJr6Kc00
+E+w/0h24ZOxQh3sXYVrlu3HoXTS6n7O/T1Z9+GOBix3zPHAduPYA9rDgd3Tqm6pQ
+w/iayOh1xv/N5BScMD9tSIMIZgB4NmtRJJ15cMM/J6MURrIP6owW/6BQdjfO7/Yr
+rgeTTnaSTaHYa9Ty9/46jZzV4QKBgQDCdvg9tInfDfC9TR1SS4yulzEjqIc+k4Y+
+/AMOKQI6Gn7zr8C2KM7wwy++RUS+ohlCODmoGSxKD1TY6D5O3Cy0+UMbQNsuDzH3
+ubBBz6pbio0CvbCI1x6PMiV8AiCYYTuQ5oa+dqE+YzUvREfOQG9XU0U1U+d1HNEQ
+da4hVrYLKQKBgQCNddJSpel2XyaNKInRLWbrNxnBgJ7gXckSCF8fuuiahEIAcXQr
+0QLQq0yppWjLMNYyZLlXOv9fML3Ynih5GBw+OHHbMhfazo8cMxYuY15PhFu5DdNK
+cnz4T9q9fK2/vhE2SbH7Z6fv1wteuUPTpMjMu1BUpMIgif+lrJndHfKYIQKBgQC4
+TUi4MoL4g53Fy3AerruGPIS15uNGy0pQJ0g+A1+48aOgENHz0nlOda6qBbxBcB/A
+QsliJ3lyN1WSvYlP9Bvq6NJQ4gbYgE47GiGSPd6XI5jBIEZPapHr5PrhrKJ3yK9L
+hS/vEz9+gUfGpE/pief8O088W2jh9Y2uq9l8f1HJAQKBgQDP4wvvdK8odsKcq4da
+DSRgw5F/OgljvzgB0wcNEBakVYNq+e3WGF27bSmd18hBnnm5p0yI0KOtqK2Vwif2
+kuHhEmT6nIlEnakh9j42yNlejSFC+NuUr43uigC0OoHIaSkLfdsysDwfEbyadj75
+p6vtHJeVh5JlzUv98dGtHS4Qfw==
+-----END PRIVATE KEY-----""";
+}
+
+// class TestKeys {
+//   // AES key in base64 (plain, not encrypted)
+//   static const String eAk = "34)56}78(9:;<defghi3456789:;<defghi";
+
+//   // RSA Public Key (plain, not encrypted)
+//   static const String enPu = "-----ILNPU WbISPJ RLf-----TPPIPqHUInrxorpNG37IHXLMHHVJHXFHTPPIJnRJHXLH5LOmeKxY30H00N8/8i43/BCOvBvU12LPtqdKit07wjzlE6I3GJm1Q1TG8+M0qVLywvDHlWVTMPbjrhZiaDiUnqV8teeOnsuY910yRUTpQSo8zfOQkEqJ2wQ7+tWnQF6A30pq6vN/UTYtb5WwYNoi8Db7KGzyBqOikFNzP/8iTkCf7ZlbWUqTpMkIAEocN1D10LbgaMxXBCvklfjotvfvx0srMv8J4KQy5KcGWk3BYzAXDxj1IB/TSfbFOrFR9MTYUbWuD6G3SPyvCWIFCa38oeLs/TW02Pq4tw1BVTjmXNV65KfP0erECBqHcOQJt9c71QbvCyMSrs0FDY/zohtoJ3PKHXHI-----LUK WbISPJ RLf-----";
+
+//   // RSA Private Key (plain, not encrypted)
+//   static const String enPr = "-----ILNPU WYPcHaL RLf-----TPPL23PIHKHUInrxorpNG37IHXLMHHZJIRr3nnZsHnLHHvPIHXKNlIqMlgvJFfqg3dlgF6qDyfqLqWxF8uGnrPr7v8tQgRDPdYRkbMwJanzaAyjFkSU4RRc2uDeCLh0wpsjSu366yHzueUgSnWp9ipAPcG+NRvQ2PrLgqLNSboSnECUuRG9W4HEy25aEgf1WdUN82I7i0ftHwwiUrXxrXtw/EQRxHGAOFwhjjnEhRum69s3fG9g//AakDfbihUm3aiXkkRdCEPU319tD+pNhZAFZ8UwG1AJI3YQa1K/24xdC+QeV+PZK4F5fqKoB2h+uQnsBGMqHCgTlvhFRSb/OOkLf451HoZ79fqBmjiGk10OIh10s0kl7crWXQv+MgXNVTJKy98GqHnTIHHLJnnLHL+WscDbnTq0ZvFHtZkG+atLs9F6sUIlyOMwmCjDgPwWjpm9qY/KUt1lOgRCsezN6do2n1Qjmf4ERU3NVYEWnFNyMr9YZkhD2WsrFic+oO5ralc/UktvHICCxMmKzyVQXpo/6/04oTOJ77+KxBAV+84HZmEv5b0l+fbmt0O0gMBJ1c+7mVr/nHdWT6wToRjD8unBLtOoD9S7cSojW7Q4wIYFa/herDVxCW1zvnihi+sSDHBLIseI2N6R9Ynup2r74UIPN/Dd+sVs9tvznuy2SswhkGLELm3W54aUFEro69M2PCgse+ntDwnobKbPyAMBTab444mKzmV1eJpt+kn3hnXRInXK84b0AvGHcvDa1Fu0cnhgy6kp7uejdMaHT7D3DBRSl1Ug++223P+qzqiHtd4ekVR1H9odLoC5vMzKqvEQd4EcNKh5wTcf7aqWKCZ3Goge4R62gR5ZmsIvP3HZ8VT+EC1kPCIEhj9JG4yFUG3NuQMycbrCue5BGyknRAOMomH2lh3RInXKV1z6pTO1OxiDxCvD+ewPy41hC36fm4w8Og27Dr8ii8n7+YmlHm4Ql4Sl+mjo2JExrXbi6nuKhi6FaPZDLqrm34ZCgCFCHWpCzLi1mZlNdr9a6UnowJk17ioJicvEsO9geH+rV1nne2Vpwzar7NXDdyZfrzOtn7SHSeQiWxTeXDXRInXKh+WKAgR9tZnwVs4FROY6H9rVsLUTrpyfvIBYogWufITtmr8MiTaUEg/f8Is5ovSj8jCsVetMdgnk3JzC/nZupnCgGuRhfyjI6erNmn1LPfpWUw5OeZNf81Cl9V5yp9RaqKkaymAjOW3mLruvepL9o9UgnYhC9g+pnSRDjbDIqo3RInXJk1lXzI6dfzpmwNOUFYBkhv56ZVtJORmII8IHTx2N3cTgYC13QV+w9QE6YVHR+4zPtQJ/XIv1A/W535igNRQH9BYxdVjnoUGHWfIHBeoXoBMFEVUYGADtqQmEIwlEzedRsyaXgxsPddtsoe2mBJjBgwHAnOL7XQ9qQvtKtN55pbXRInXJuhMra1qttkeqg/ua+E5nJ4mnvAccONEdp6Z5muWUBM1g1UtG8pZ2t8KP8UgkzjvIdwMgs4bEyIznqpugd7TXasUQYdfsAvXBGMYF+S7itUEqmgOrclVDRuPL8xejJwVjTTr1q4w6s4Y4f78HydBK+9qoZbuZx8d4hDVALGtA9wH==-----LUK WYPcHaL RLf-----";
+// }
+

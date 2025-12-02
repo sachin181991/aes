@@ -36,6 +36,7 @@ function modifiedCaesarDecrypt(encryptedKey) {
 
 /**
  * Key Decryption for RSA Keys
+ * Handles custom PEM headers and decrypts the key content
  * @param {string} encryptedKey - The encrypted RSA key
  * @returns {string} - The decrypted RSA key
  */
@@ -44,38 +45,158 @@ function keyDecrypt(encryptedKey) {
     throw new Error('Encrypted key is required');
   }
   
-  // If the key is already in PEM format (has BEGIN/END markers), return as is
-  // PEM keys are already in the correct format and don't need decryption
-  if (encryptedKey.includes('-----BEGIN') && encryptedKey.includes('-----END')) {
-    return encryptedKey;
+  let key = encryptedKey;
+  let isPublicKey = false;
+  let isPrivateKey = false;
+  let base64Content = '';
+  
+  // Extract base64 content and determine key type
+  if (key.includes('-----ILNPU WbISPJ RLf-----')) {
+    isPublicKey = true;
+    const match = key.match(/-----ILNPU WbISPJ RLf-----(.*?)-----LUK WbISPJ RLf-----/s);
+    if (match && match[1]) {
+      base64Content = match[1].trim();
+    }
+  } else if (key.includes('-----ILNPU WYPcHaL RLf-----')) {
+    isPrivateKey = true;
+    const match = key.match(/-----ILNPU WYPcHaL RLf-----(.*?)-----LUK WYPcHaL RLf-----/s);
+    if (match && match[1]) {
+      base64Content = match[1].trim();
+    }
+  } else if (key.includes('-----BEGIN') && key.includes('-----END')) {
+    const match = key.match(/-----BEGIN[^-]+-----\s*(.*?)\s*-----END[^-]+-----/s);
+    if (match && match[1]) {
+      base64Content = match[1].trim();
+      isPublicKey = key.includes('PUBLIC KEY');
+      isPrivateKey = key.includes('PRIVATE KEY');
+    }
+  } else {
+    base64Content = key.trim();
   }
   
-  // Placeholder for actual key decryption logic
-  // In production, this should use proper key management
-  // For now, assuming the key might be base64 encoded or use similar decryption
-  try {
-    // Try base64 decode first (only if it's not already PEM format)
-    // Check if it looks like base64 (no special characters except base64 chars)
-    const base64Pattern = /^[A-Za-z0-9+/=\s]+$/;
-    if (base64Pattern.test(encryptedKey.trim())) {
-      const decoded = Buffer.from(encryptedKey.trim(), 'base64').toString('utf-8');
-      // If decoded result looks like PEM, return it
-      if (decoded.includes('-----BEGIN')) {
-        return decoded;
-      }
-      // Otherwise, the original might not be base64, return as is
-      return encryptedKey;
-    }
-    // If not base64 pattern, return as is
-    return encryptedKey;
-  } catch (error) {
-    // If base64 decode fails, return as is (assuming already decrypted or different format)
-    return encryptedKey;
+  if (!base64Content) {
+    throw new Error('No key content found');
   }
+  
+  // Try multiple decryption approaches to find the correct one
+  const cleanBase64 = base64Content.replace(/\s+/g, '');
+  let decryptedBase64 = '';
+  let found = false;
+  
+  // Approach 1: Try different shift values on base64 string
+  for (let shift = 1; shift <= 20; shift++) {
+    try {
+      const testDecrypted = decryptBase64ContentWithShift(cleanBase64, shift);
+      const testBytes = Buffer.from(testDecrypted, 'base64');
+      if (testBytes.length > 0 && testBytes[0] === 0x30) {
+        decryptedBase64 = testDecrypted;
+        found = true;
+        break;
+      }
+    } catch (e) {
+      // Continue to next shift
+    }
+  }
+  
+  // Approach 2: If base64 string decryption didn't work, try byte-level decryption
+  if (!found) {
+    try {
+      const encryptedBytes = Buffer.from(cleanBase64, 'base64');
+      // Try different byte-level shifts
+      for (let shift = 1; shift <= 20; shift++) {
+        const decryptedBytes = decryptBytesWithShift(encryptedBytes, shift);
+        if (decryptedBytes.length > 0 && decryptedBytes[0] === 0x30) {
+          decryptedBase64 = decryptedBytes.toString('base64');
+          found = true;
+          break;
+        }
+      }
+    } catch (e) {
+      // Byte-level decryption failed
+    }
+  }
+  
+  // Approach 3: If still not found, try the original method (shift 3)
+  if (!found) {
+    decryptedBase64 = decryptBase64Content(cleanBase64);
+  }
+  
+  if (!decryptedBase64) {
+    throw new Error('Failed to decrypt key content - all decryption methods failed');
+  }
+  
+  // Reconstruct PEM format
+  const finalBase64 = decryptedBase64.replace(/\s+/g, '');
+  let formattedKey = '';
+  for (let i = 0; i < finalBase64.length; i += 64) {
+    const end = Math.min(i + 64, finalBase64.length);
+    formattedKey += finalBase64.substring(i, end) + '\n';
+  }
+  
+  if (isPublicKey) {
+    return `-----BEGIN PUBLIC KEY-----\n${formattedKey}-----END PUBLIC KEY-----`;
+  } else if (isPrivateKey) {
+    return `-----BEGIN PRIVATE KEY-----\n${formattedKey}-----END PRIVATE KEY-----`;
+  } else {
+    // Default to public key
+    return `-----BEGIN PUBLIC KEY-----\n${formattedKey}-----END PUBLIC KEY-----`;
+  }
+}
+
+/**
+ * Decrypt base64 content using modified Caesar cipher
+ * Base64 alphabet: A-Z, a-z, 0-9, +, /, =
+ * @param {string} encryptedBase64 - The encrypted base64 string
+ * @returns {string} - The decrypted base64 string
+ */
+function decryptBase64Content(encryptedBase64) {
+  return decryptBase64ContentWithShift(encryptedBase64, 3);
+}
+
+/**
+ * Decrypt base64 content with a specific shift value
+ * @param {string} encryptedBase64 - The encrypted base64 string
+ * @param {number} shift - The shift value
+ * @returns {string} - The decrypted base64 string
+ */
+function decryptBase64ContentWithShift(encryptedBase64, shift) {
+  const base64Chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=';
+  let decrypted = '';
+  
+  for (let i = 0; i < encryptedBase64.length; i++) {
+    const char = encryptedBase64[i];
+    const charIndex = base64Chars.indexOf(char);
+    
+    if (charIndex >= 0) {
+      // Decrypt using cyclic shift within base64 alphabet
+      const decryptedIndex = (charIndex - shift + base64Chars.length) % base64Chars.length;
+      decrypted += base64Chars[decryptedIndex];
+    } else {
+      // Whitespace or other characters, keep as is
+      decrypted += char;
+    }
+  }
+  
+  return decrypted;
+}
+
+/**
+ * Decrypt bytes with a specific shift value
+ * @param {Buffer} encryptedBytes - The encrypted bytes
+ * @param {number} shift - The shift value
+ * @returns {Buffer} - The decrypted bytes
+ */
+function decryptBytesWithShift(encryptedBytes, shift) {
+  const decrypted = Buffer.alloc(encryptedBytes.length);
+  
+  for (let i = 0; i < encryptedBytes.length; i++) {
+    decrypted[i] = (encryptedBytes[i] - shift + 256) % 256;
+  }
+  
+  return decrypted;
 }
 
 module.exports = {
   modifiedCaesarDecrypt,
   keyDecrypt
 };
-

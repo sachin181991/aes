@@ -10,10 +10,25 @@ async function importAesKey(rawAesKey) {
     throw new Error('AES key is required');
   }
   
-  // Ensure key is 32 bytes (256 bits) for AES-256
-  // If key is shorter, pad it; if longer, truncate it
-  const keyBuffer = Buffer.from(rawAesKey, 'utf-8');
+  let keyBuffer;
   
+  // Check if it's base64 encoded (test keys are base64)
+  try {
+    // Try to decode as base64 first
+    const decoded = Buffer.from(rawAesKey, 'base64');
+    // If decode succeeds and length is reasonable, use it
+    if (decoded.length >= 16 && decoded.length <= 64) {
+      keyBuffer = decoded;
+    } else {
+      // Base64 decode produced unexpected length, treat as plain text
+      keyBuffer = Buffer.from(rawAesKey, 'utf-8');
+    }
+  } catch (e) {
+    // Not base64, treat as plain text
+    keyBuffer = Buffer.from(rawAesKey, 'utf-8');
+  }
+  
+  // Ensure key is exactly 32 bytes (256 bits) for AES-256
   if (keyBuffer.length < 32) {
     // Pad with zeros
     const paddedKey = Buffer.alloc(32);
